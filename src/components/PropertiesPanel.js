@@ -17,7 +17,8 @@ import { updateShape, removeShape, setSelectedShape } from '../store/drawingSlic
 
 const PropertiesPanel = () => {
   const dispatch = useDispatch();
-  const { shapes, selectedShapeId } = useSelector((state) => state.drawing);
+  const { slides, currentSlideIndex, selectedShapeId } = useSelector((state) => state.drawing);
+  const shapes = slides[currentSlideIndex].shapes;
 
   const selectedShape = shapes.find(shape => shape.id === selectedShapeId);
 

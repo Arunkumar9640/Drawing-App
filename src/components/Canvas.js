@@ -20,12 +20,15 @@ const Canvas = () => {
   const canvasRef = useRef(null);
   const dispatch = useDispatch();
   const {
-    shapes,
+    slides,
+    currentSlideIndex,
     selectedShapeId,
     currentTool,
     drawingStyle,
     isDrawing,
   } = useSelector((state) => state.drawing);
+
+  const shapes = slides[currentSlideIndex].shapes;
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });

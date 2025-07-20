@@ -35,9 +35,10 @@ import { saveDrawingToStorage } from '../utils/storageUtils';
 
 const Toolbar = () => {
   const dispatch = useDispatch();
-  const { currentTool, drawingStyle, shapes, historyIndex, history } = useSelector(
+  const { currentTool, drawingStyle, slides, currentSlideIndex } = useSelector(
     (state) => state.drawing
   );
+  const { shapes, historyIndex, history } = slides[currentSlideIndex];
 
   const tools = [
     { id: 'select', icon: <TouchApp />, label: 'Select' },
@@ -86,7 +87,7 @@ const Toolbar = () => {
   };
 
   const canUndo = historyIndex > 0;
-  const canRedo = historyIndex < history.length - 1;
+  const canRedo = historyIndex < history?.length - 1;
 
   return (
     <Box className="bg-white border-b border-gray-200 p-4 shadow-sm">

@@ -6,6 +6,7 @@ import { store } from './store/store';
 import { loadDrawing } from './store/drawingSlice';
 import { loadDrawingFromStorage } from './utils/storageUtils';
 import Toolbar from './components/Toolbar';
+import SlideBar from './components/SlideBar';
 import Canvas from './components/Canvas';
 import PropertiesPanel from './components/PropertiesPanel';
 import './App.css';
@@ -41,6 +42,7 @@ function App() {
             </div>
           </header>
           <Toolbar />
+          <SlideBar />
           <div className="flex-1 flex overflow-hidden">
             <div className="flex-1 flex items-center justify-center p-6">
               <Canvas />

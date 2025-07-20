@@ -2,7 +2,14 @@ import { createSlice } from '@reduxjs/toolkit';
 import { autoSaveDrawing } from '../utils/storageUtils';
 
 const initialState = {
-  shapes: [],
+  slides: [
+    {
+      shapes: [],
+      history: [],
+      historyIndex: -1,
+    },
+  ],
+  currentSlideIndex: 0,
   selectedShapeId: null,
   currentTool: 'select', // 'select', 'rectangle', 'circle', 'line', 'freehand'
   drawingStyle: {
@@ -12,8 +19,6 @@ const initialState = {
     lineStyle: 'solid', // 'solid', 'dashed'
   },
   isDrawing: false,
-  history: [],
-  historyIndex: -1,
 };
 
 const drawingSlice = createSlice({
@@ -21,39 +26,42 @@ const drawingSlice = createSlice({
   initialState,
   reducers: {
     addShape: (state, action) => {
-      state.shapes.push(action.payload);
+      const slide = state.slides[state.currentSlideIndex];
+      slide.shapes.push(action.payload);
       state.selectedShapeId = action.payload.id;
       // Add to history
-      state.history = state.history.slice(0, state.historyIndex + 1);
-      state.history.push([...state.shapes]);
-      state.historyIndex = state.history.length - 1;
+      slide.history = slide.history.slice(0, slide.historyIndex + 1);
+      slide.history.push([...slide.shapes]);
+      slide.historyIndex = slide.history.length - 1;
       // Auto-save
-      autoSaveDrawing(state.shapes);
+      autoSaveDrawing(slide.shapes);
     },
     updateShape: (state, action) => {
+      const slide = state.slides[state.currentSlideIndex];
       const { id, updates } = action.payload;
-      const shapeIndex = state.shapes.findIndex(shape => shape.id === id);
+      const shapeIndex = slide.shapes.findIndex(shape => shape.id === id);
       if (shapeIndex !== -1) {
-        state.shapes[shapeIndex] = { ...state.shapes[shapeIndex], ...updates };
+        slide.shapes[shapeIndex] = { ...slide.shapes[shapeIndex], ...updates };
         // Add to history
-        state.history = state.history.slice(0, state.historyIndex + 1);
-        state.history.push([...state.shapes]);
-        state.historyIndex = state.history.length - 1;
+        slide.history = slide.history.slice(0, slide.historyIndex + 1);
+        slide.history.push([...slide.shapes]);
+        slide.historyIndex = slide.history.length - 1;
         // Auto-save
-        autoSaveDrawing(state.shapes);
+        autoSaveDrawing(slide.shapes);
       }
     },
     removeShape: (state, action) => {
-      state.shapes = state.shapes.filter(shape => shape.id !== action.payload);
+      const slide = state.slides[state.currentSlideIndex];
+      slide.shapes = slide.shapes.filter(shape => shape.id !== action.payload);
       if (state.selectedShapeId === action.payload) {
         state.selectedShapeId = null;
       }
       // Add to history
-      state.history = state.history.slice(0, state.historyIndex + 1);
-      state.history.push([...state.shapes]);
-      state.historyIndex = state.history.length - 1;
+      slide.history = slide.history.slice(0, slide.historyIndex + 1);
+      slide.history.push([...slide.shapes]);
+      slide.historyIndex = slide.history.length - 1;
       // Auto-save
-      autoSaveDrawing(state.shapes);
+      autoSaveDrawing(slide.shapes);
     },
     setSelectedShape: (state, action) => {
       state.selectedShapeId = action.payload;
@@ -68,32 +76,50 @@ const drawingSlice = createSlice({
       state.isDrawing = action.payload;
     },
     clearCanvas: (state) => {
-      state.shapes = [];
+      const slide = state.slides[state.currentSlideIndex];
+      slide.shapes = [];
       state.selectedShapeId = null;
-      state.history = [];
-      state.historyIndex = -1;
+      slide.history = [];
+      slide.historyIndex = -1;
       // Auto-save
-      autoSaveDrawing(state.shapes);
+      autoSaveDrawing(slide.shapes);
     },
     loadDrawing: (state, action) => {
-      state.shapes = action.payload.shapes || [];
+      // For backward compatibility, load into the first slide
+      state.slides = [
+        {
+          shapes: action.payload.shapes || [],
+          history: [],
+          historyIndex: -1,
+        },
+      ];
+      state.currentSlideIndex = 0;
       state.selectedShapeId = null;
-      state.history = [];
-      state.historyIndex = -1;
     },
     undo: (state) => {
-      if (state.historyIndex > 0) {
-        state.historyIndex--;
-        state.shapes = [...state.history[state.historyIndex]];
+      const slide = state.slides[state.currentSlideIndex];
+      if (slide.historyIndex > 0) {
+        slide.historyIndex--;
+        slide.shapes = [...slide.history[slide.historyIndex]];
         state.selectedShapeId = null;
       }
     },
     redo: (state) => {
-      if (state.historyIndex < state.history.length - 1) {
-        state.historyIndex++;
-        state.shapes = [...state.history[state.historyIndex]];
+      const slide = state.slides[state.currentSlideIndex];
+      if (slide.historyIndex < slide.history.length - 1) {
+        slide.historyIndex++;
+        slide.shapes = [...slide.history[slide.historyIndex]];
         state.selectedShapeId = null;
       }
+    },
+    addSlide: (state) => {
+      state.slides.push({ shapes: [], history: [], historyIndex: -1 });
+      state.currentSlideIndex = state.slides.length - 1;
+      state.selectedShapeId = null;
+    },
+    setCurrentSlide: (state, action) => {
+      state.currentSlideIndex = action.payload;
+      state.selectedShapeId = null;
     },
   },
 });
@@ -110,6 +136,8 @@ export const {
   loadDrawing,
   undo,
   redo,
+  addSlide,
+  setCurrentSlide,
 } = drawingSlice.actions;
 
 export default drawingSlice.reducer; 
