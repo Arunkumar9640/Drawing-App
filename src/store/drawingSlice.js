@@ -117,6 +117,15 @@ const drawingSlice = createSlice({
       state.currentSlideIndex = state.slides.length - 1;
       state.selectedShapeId = null;
     },
+    deleteSlide: (state, action) => {
+      const idx = action.payload;
+      if (state.slides.length === 1) return; // Prevent deleting last slide
+      state.slides.splice(idx, 1);
+      if (state.currentSlideIndex >= state.slides.length) {
+        state.currentSlideIndex = state.slides.length - 1;
+      }
+      state.selectedShapeId = null;
+    },
     setCurrentSlide: (state, action) => {
       state.currentSlideIndex = action.payload;
       state.selectedShapeId = null;
@@ -137,6 +146,7 @@ export const {
   undo,
   redo,
   addSlide,
+  deleteSlide,
   setCurrentSlide,
 } = drawingSlice.actions;
 

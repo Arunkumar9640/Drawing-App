@@ -38,7 +38,7 @@ function App() {
           <header className="bg-white shadow-sm border-b border-gray-200">
             <div className="px-6 py-4">
               <h1 className="text-2xl font-bold text-gray-800"> Drawing App</h1>
-              <p className="text-gray-600 mt-1">Create, edit, and save your drawings</p>
+              <p className="text-gray-600 mt-1">Create, Edit, And Save Your Drawings....</p>
             </div>
           </header>
           <Toolbar />
